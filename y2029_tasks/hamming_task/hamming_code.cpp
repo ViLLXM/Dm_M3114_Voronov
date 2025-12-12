@@ -1,18 +1,13 @@
+#include "hamming_code.h"
+
 #include <iostream>
 #include <cstdint>
 #include <cstring>
 #include <vector>
 #include <string>
 
-constexpr uint8_t kFullBit = 1;
-constexpr uint8_t kULLBait_in_bits = 64;
-
-constexpr const char kEncodeCommand[] = "encode";
-constexpr const char kDecodeCommand[] = "decode";
-constexpr const char kValidationCommand[] = "is_valid";
-
 namespace hamming_code{
-    uint8_t GetBit(const std::vector<uint64_t>& value, uint64_t index){
+    uint8_t HammingCode::GetBit(const std::vector<uint64_t>& value, uint64_t index){
         uint64_t block = index / kULLBait_in_bits;
         uint64_t bit_in_block  = index & (kULLBait_in_bits - kFullBit);
 
@@ -23,7 +18,7 @@ namespace hamming_code{
         return (value[block] >> bit_in_block) & kFullBit;
     }
 
-    void SetBit(std::vector<uint64_t>& value, uint64_t index){
+    void HammingCode::SetBit(std::vector<uint64_t>& value, uint64_t index){
         uint64_t block = index / kULLBait_in_bits;
         uint64_t bit_in_block  = index & (kULLBait_in_bits - kFullBit);
 
@@ -34,7 +29,7 @@ namespace hamming_code{
         value[block] |= (1ULL << bit_in_block);
     }
 
-    void FlipBit(std::vector<uint64_t>& value, uint64_t index){
+    void HammingCode::FlipBit(std::vector<uint64_t>& value, uint64_t index){
         uint64_t block = index / kULLBait_in_bits;
         uint64_t bit_in_block  = index & (kULLBait_in_bits - kFullBit);
 
@@ -45,7 +40,7 @@ namespace hamming_code{
         value[block] ^= (1ULL << bit_in_block);
     }
 
-    std::vector<uint64_t> ConvertToValue(char* bit_vector){
+    std::vector<uint64_t> HammingCode::ConvertToValue(char* bit_vector){
         std::vector<uint64_t> value;
         uint64_t vector_length = 0;
 
@@ -63,7 +58,7 @@ namespace hamming_code{
         return value;
     }
 
-    std::string ConvertToBitVector(const std::vector<uint64_t>& value, uint64_t length){
+    std::string HammingCode::ConvertToBitVector(const std::vector<uint64_t>& value, uint64_t length){
         std::string bit_vector{};
         bit_vector.reserve(length);
 
@@ -74,7 +69,7 @@ namespace hamming_code{
         return bit_vector;
     }
 
-    uint16_t GetTestBits(uint64_t data_bits){
+    uint16_t HammingCode::GetTestBits(uint64_t data_bits){
         uint16_t test_bits = 0;
 
         while ((kFullBit << test_bits) < data_bits + test_bits + kFullBit){
@@ -84,7 +79,7 @@ namespace hamming_code{
         return test_bits;
     }
 
-    std::string Encode(uint64_t input_length, uint64_t output_length, char *bit_vector){
+    std::string HammingCode::Encode(uint64_t input_length, uint64_t output_length, char *bit_vector){
         uint64_t data_bits = input_length;
         uint64_t total_bits = output_length;
         uint64_t test_bits = total_bits - data_bits;
@@ -129,7 +124,7 @@ namespace hamming_code{
         return ConvertToBitVector(encoded_value, total_bits);
     }
 
-    std::string Decode(uint64_t input_length, char *bit_vector){
+    std::string HammingCode::Decode(uint64_t input_length, char *bit_vector){
         uint64_t total_bits = input_length;
 
         std::vector<uint64_t> value = ConvertToValue(bit_vector);
@@ -183,7 +178,7 @@ namespace hamming_code{
         return ConvertToBitVector(decoded_value, data_bits);
     }
 
-    bool IsValid(uint64_t input_length, char* bit_vector){
+    bool HammingCode::IsValid(uint64_t input_length, char* bit_vector){
         uint64_t total_bits = input_length;
 
         std::vector<uint64_t> value = ConvertToValue(bit_vector);
@@ -217,14 +212,16 @@ namespace hamming_code{
 } // namespace hamming_code
 
 int main(int argc, char* argv[]){
-    if (strcmp(kEncodeCommand, argv[1]) == 0){
-        std::cout << hamming_code::Encode(std::atoi(argv[2]), std::atoi(argv[3]), argv[4]) << '\n';
-        return 0;
-    } else if(strcmp(kDecodeCommand, argv[1]) == 0){
-        std::cout << hamming_code::Decode(std::atoi(argv[2]), argv[3]) << '\n';
-    } else if(strcmp(kValidationCommand, argv[1]) == 0){
+    hamming_code::HammingCode code;
 
-        if (hamming_code::IsValid(std::atoi(argv[2]), argv[3])){
+    if (strcmp(hamming_code::kEncodeCommand, argv[1]) == 0){
+        std::cout << code.Encode(std::atoi(argv[2]), std::atoi(argv[3]), argv[4]) << '\n';
+        return 0;
+    } else if(strcmp(hamming_code::kDecodeCommand, argv[1]) == 0){
+        std::cout << code.Decode(std::atoi(argv[2]), argv[3]) << '\n';
+    } else if(strcmp(hamming_code::kValidationCommand, argv[1]) == 0){
+
+        if (code.IsValid(std::atoi(argv[2]), argv[3])){
             std::cout << "1";
         } else{
             std::cout << "0";

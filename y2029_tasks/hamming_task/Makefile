@@ -1,8 +1,7 @@
 CXX = clang++
-TARGET = hamming
-SRC = hamming_code.cpp
+CXXFLAGS = -std=c++20
 
 all:
-	$(CXX) $(SRC) -o $(TARGET)
+	$(CXX) $(CXXFLAGS) hamming_code.cpp -o ./hamming
 clean:
-	rm -f $(TARGET)
+	rm -f ./hamming
